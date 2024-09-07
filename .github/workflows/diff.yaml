@@ -17,6 +17,7 @@ jobs:
 
       - name: Obter diferenças entre main e develop
         run: |
+          echo ${{ secrets.TEST_ENV }}
           # Certifique-se de que ambas as branches estejam presentes
           git fetch origin main
           git fetch origin develop
@@ -24,5 +25,3 @@ jobs:
           # Verifique a diferença entre as branches
           echo "Diferenças entre main e develop:"
           git diff origin/main origin/develop -- . ':(exclude)*.yml'
-          echo ${{ secrets.TEST_ENV }}
-
