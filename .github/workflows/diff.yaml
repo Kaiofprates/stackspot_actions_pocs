@@ -16,4 +16,4 @@ jobs:
       - name: Verificar número de commits
         id: commit_check
         run: |
-          git diff main
+          git diff main develop
