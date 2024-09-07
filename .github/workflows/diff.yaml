@@ -1,19 +1,23 @@
-name: Print Secret
+name: Use Secret in Script
 
 on:
   push:
     branches:
-      - develop  # Executa a Action quando houver um push na branch "main"
+      - develop
 
 jobs:
-  print-secret:
+  use-secret:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checar código do repositório
         uses: actions/checkout@v3
 
-      - name: Imprimir segredo
+      - name: Usar segredo em um script
+        env:
+          MY_SECRET: ${{ secrets.TEST_ENV }}
         run: |
-          # Imprime o valor da variável secreta
-          echo "O valor do secret é: ${{ secrets.TEST_ENV }}"
+          echo "Usando o segredo em um script..."
+          # Aqui você pode usar a variável MY_SECRET em um script ou comando
+          # Por exemplo, se você estiver rodando um script bash:
+          echo "O segredo é acessível na variável MY_SECRET"
