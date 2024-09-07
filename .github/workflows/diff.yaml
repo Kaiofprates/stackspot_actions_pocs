@@ -8,23 +8,9 @@ on:
 jobs:
   print-diff:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checar código do repositório
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0  # Clona o histórico completo  
-
-      - name: Obter diferenças entre main e develop
-        env:
-          TEST_ENV: ${{ secrets.TEST_ENV }}
-        run: |
-          # Certifique-se de que ambas as branches estejam presentes
-          git fetch origin main
-          git fetch origin develop
-
-          # Verifique a diferença entre as branches
-          echo "Diferenças entre main e develop:"
-          git diff origin/main origin/develop -- . ':(exclude)*.yml'
-          echo "O valor do secret é: $TEST_ENV"
-
+      - shell: bash
+      env:
+        TEST_ENV: ${{ secrets.TEST_ENV }}
+      run: |
+        echo "O valor do secret é: $TEST_ENV"
