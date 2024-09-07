@@ -3,25 +3,36 @@ name: Print new code
 on:
   push:
     branches:
-      - develop 
+      - develop
 
 jobs:
   print-new-code:
     runs-on: ubuntu-latest
 
     steps:
-      # Verifica o código do repositório
       - name: Checar código do repositório
         uses: actions/checkout@v3
 
-      # Pegar a diferença dos arquivos alterados no commit e imprimi-los
+      - name: Verificar número de commits
+        id: commit_check
+        run: |
+          # Verifica se é o primeiro commit
+          if [ $(git rev-list --count HEAD) -eq 1 ]; then
+            echo "first_commit=true" >> $GITHUB_ENV
+          else
+            echo "first_commit=false" >> $GITHUB_ENV
+          fi
+
       - name: Imprimir código novo/alterado
         run: |
-          # Exibir a lista de arquivos modificados ou novos
-          echo "Arquivos modificados/adicionados:"
-          git diff --name-only HEAD~1 HEAD
+          if [ "$GITHUB_ENV" == "first_commit=true" ]; then
+            echo "Primeiro commit detectado. Exibindo todos os arquivos:"
+            git ls-files
+            git show HEAD
+          else
+            echo "Arquivos modificados/adicionados:"
+            git diff --name-only HEAD~1 HEAD
 
-          # Exibir o conteúdo dos arquivos que foram modificados/adicionados
-          echo "Conteúdo dos arquivos:"
-          git diff HEAD~1 HEAD -- . ':(exclude)*.yml'  # Ignora arquivos YAML do workflow, por exemplo
-
+            echo "Conteúdo dos arquivos modificados/adicionados:"
+            git diff HEAD~1 HEAD -- . ':(exclude)*.yml'
+          fi
