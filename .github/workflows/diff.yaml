@@ -24,7 +24,5 @@ jobs:
           # Verifique a diferença entre as branches
           echo "Diferenças entre main e develop:"
           git diff origin/main origin/develop -- . ':(exclude)*.yml'
-
-        run: | 
           echo "${secrets.TEST_ENV}" 
 
