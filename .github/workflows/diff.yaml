@@ -17,7 +17,7 @@ jobs:
 
       - name: Obter diferenças entre main e develop
         run: |
-          echo ${{ secrets.TEST_ENV }}
+          echo "${{ secrets.TEST_ENV }}"
           # Certifique-se de que ambas as branches estejam presentes
           git fetch origin main
           git fetch origin develop
