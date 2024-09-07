@@ -1,0 +1,27 @@
+name: Print new code
+
+on:
+  push:
+    branches:
+      - develop 
+
+jobs:
+  print-new-code:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Verifica o código do repositório
+      - name: Checar código do repositório
+        uses: actions/checkout@v3
+
+      # Pegar a diferença dos arquivos alterados no commit e imprimi-los
+      - name: Imprimir código novo/alterado
+        run: |
+          # Exibir a lista de arquivos modificados ou novos
+          echo "Arquivos modificados/adicionados:"
+          git diff --name-only HEAD~1 HEAD
+
+          # Exibir o conteúdo dos arquivos que foram modificados/adicionados
+          echo "Conteúdo dos arquivos:"
+          git diff HEAD~1 HEAD -- . ':(exclude)*.yml'  # Ignora arquivos YAML do workflow, por exemplo
+
