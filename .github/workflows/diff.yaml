@@ -1,19 +1,26 @@
-name: Print new code
+name: Print diff between main and develop
 
 on:
   push:
     branches:
-      - develop
+      - develop  # Executa a Action quando houver um push na branch "develop"
 
 jobs:
-  print-new-code:
+  print-diff:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checar código do repositório
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Clona o histórico completo
 
-      - name: Verificar número de commits
-        id: commit_check
+      - name: Obter diferenças entre main e develop
         run: |
-          git diff main develop
+          # Certifique-se de que ambas as branches estejam presentes
+          git fetch origin main
+          git fetch origin develop
+
+          # Verifique a diferença entre as branches
+          echo "Diferenças entre main e develop:"
+          git diff origin/main origin/develop -- . ':(exclude)*.yml'
