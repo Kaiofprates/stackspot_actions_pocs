@@ -1,27 +1,19 @@
-name: Print diff between main and develop
+name: Print Secret
 
 on:
   push:
     branches:
-      - develop  # Executa a Action quando houver um push na branch "develop"
+      - develop  # Executa a Action quando houver um push na branch "main"
 
 jobs:
-  print-diff:
+  print-secret:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checar código do repositório
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0  # Clona o histórico completo  
 
-      - name: Obter diferenças entre main e develop
+      - name: Imprimir segredo
         run: |
-          echo "${{ secrets.TEST_ENV }}"
-          # Certifique-se de que ambas as branches estejam presentes
-          git fetch origin main
-          git fetch origin develop
-
-          # Verifique a diferença entre as branches
-          echo "Diferenças entre main e develop:"
-          git diff origin/main origin/develop -- . ':(exclude)*.yml'
+          # Imprime o valor da variável secreta
+          echo "O valor do secret é: ${{ secrets.TEST_ENV }}"
