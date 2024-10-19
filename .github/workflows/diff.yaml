@@ -34,4 +34,4 @@ jobs:
           FULL_CONTENT="$ANALYSIS_CONTEXT\n\n$DIFF_CONTENT"
           echo "Conteúdo combinado para análise:"
           echo "$FULL_CONTENT"  # Exibe o conteúdo combinado (contexto + diff)
-          ./test.sh ${{ secrets.ID }} ${{ secrets.SECRET }} "$FULL_CONTENT"
+          ./test.sh ${{ secrets.ID }} ${{ secrets.SECRET }} "boa tarde"
