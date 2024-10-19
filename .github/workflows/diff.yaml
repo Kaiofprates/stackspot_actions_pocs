@@ -21,3 +21,9 @@ jobs:
           echo "O segredo é acessível na variável ${{ secrets.MY_SECRET }}"
           echo "Obtendo IP público..."
           curl "https://api.ipify.org?format=json"
+          curl --request POST \
+          --url https://idm.stackspot.com/zup/oidc/oauth/token \
+          --header 'Content-Type: application/x-www-form-urlencoded' \
+          --data client_id=${{ secrets.ID } \
+          --data grant_type=client_credentials \
+          --data client_secret=${{ secrets.SECRET }
