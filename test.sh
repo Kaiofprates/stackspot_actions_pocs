@@ -1,60 +1,90 @@
 #!/bin/bash
 
-# Recebe as variáveis passadas como argumentos
-CLIENT_ID=$1
-CLIENT_SECRET=$2
-INPUT_DATA=$3  # Novo argumento para o input_data
+# Função para obter o access_token
+get_access_token() {
+  local client_id=$1
+  local client_secret=$2
 
-# Executa o curl e captura a resposta
-response=$(curl --request POST \
-  --url https://idm.stackspot.com/zup/oidc/oauth/token \
-  --header 'Content-Type: application/x-www-form-urlencoded' \
-  --data client_id=$CLIENT_ID \
-  --data grant_type=client_credentials \
-  --data client_secret=$CLIENT_SECRET)
+  response=$(curl --silent --request POST \
+    --url https://idm.stackspot.com/zup/oidc/oauth/token \
+    --header 'Content-Type: application/x-www-form-urlencoded' \
+    --data client_id=$client_id \
+    --data grant_type=client_credentials \
+    --data client_secret=$client_secret)
 
-# Exibe a resposta completa para depuração
-echo "Resposta do primeiro curl (token): $response"
+  access_token=$(echo $response | grep -o '"access_token":"[^"]*"' | sed 's/"access_token":"\([^"]*\)"/\1/')
 
-# Extrai o access_token da resposta usando grep e sed
-access_token=$(echo $response | grep -o '"access_token":"[^"]*"' | sed 's/"access_token":"\([^"]*\)"/\1/')
+  if [ -z "$access_token" ]; then
+    echo "Erro: access_token não encontrado!"
+    exit 1
+  fi
 
-# Verifica se o access_token foi extraído corretamente
-if [ -z "$access_token" ]; then
-  echo "Erro: access_token não encontrado!"
-  exit 1
-fi
+  echo "$access_token"
+}
 
-echo "Access Token: $access_token"
+# Função para criar a execução e obter o ID
+create_execution() {
+  local access_token=$1
+  local input_data=$2
 
-# Executa o segundo curl usando o access_token e o input_data parametrizado
-id=$(curl --request POST \
-  --url 'https://genai-code-buddy-api.stackspot.com/v1/quick-commands/create-execution/testremote' \
-  --header "Authorization: Bearer $access_token" \
-  --header 'Content-Type: application/json' \
-  --data "{\"input_data\": \"$INPUT_DATA\"}")
+  response=$(curl --silent --request POST \
+    --url 'https://genai-code-buddy-api.stackspot.com/v1/quick-commands/create-execution/testremote' \
+    --header "Authorization: Bearer $access_token" \
+    --header 'Content-Type: application/json' \
+    --data "{\"input_data\": \"$input_data\"}")
 
-# Exibe a resposta completa do segundo curl para depuração
-echo "Resposta completa do segundo curl: $id"
+  execution_id=$(echo $response | grep -o '"execution_id":"[^"]*"' | sed 's/"execution_id":"\([^"]*\)"/\1/')
 
-# Extrai o ID da resposta (removendo as aspas)
-id=$(echo $id | grep -o '"execution_id":"[^"]*"' | sed 's/"execution_id":"\([^"]*\)"/\1/')
-echo "ID retornado pelo segundo curl: $id"
+  if [ -z "$execution_id" ]; then
+    echo "Erro: execution_id não encontrado!"
+    exit 1
+  fi
 
-# Adiciona uma latência de 10 segundos antes de executar o terceiro curl
-echo "Aguardando 10 segundos antes de executar o terceiro curl..."
-sleep 10
+  echo "$execution_id"
+}
 
-# Executa o terceiro curl usando o ID
-result=$(curl --request GET \
-  --url "https://genai-code-buddy-api.stackspot.com/v1/quick-commands/callback/$id" \
-  --header "Authorization: Bearer $access_token")
+# Função para verificar o status da execução
+check_execution_status() {
+  local access_token=$1
+  local execution_id=$2
 
-# Exibe a resposta do terceiro curl
-echo "Resposta do terceiro curl: $result"
+  response=$(curl --silent --request GET \
+    --url "https://genai-code-buddy-api.stackspot.com/v1/quick-commands/callback/$execution_id" \
+    --header "Authorization: Bearer $access_token")
 
-# Extrai o campo 'answer' da resposta usando grep e sed
-answer=$(echo $result)
+  echo "$response"
+}
 
-# Exibe o valor do campo 'answer'
-echo "Campo 'answer': $answer"
+# Função principal para orquestrar o fluxo
+main() {
+  local client_id=$1
+  local client_secret=$2
+  local input_data=$3
+
+  # Obter o access_token
+  access_token=$(get_access_token "$client_id" "$client_secret")
+  echo "Access Token obtido com sucesso."
+
+  # Criar a execução e obter o ID
+  execution_id=$(create_execution "$access_token" "$input_data")
+  echo "Execução criada com ID: $execution_id"
+
+  # Verificar o status da execução em intervalos de 5 segundos
+  echo "Verificando o status da execução..."
+  while true; do
+    result=$(check_execution_status "$access_token" "$execution_id")
+
+    # Verifica se o campo 'answer' está presente na resposta
+    if echo "$result" | grep -q '"answer"'; then
+      answer=$(echo "$result" | grep -o '"answer":"[^"]*"' | sed 's/"answer":"\([^"]*\)"/\1/')
+      echo "Execução concluída. Resposta: $answer"
+      break
+    else
+      echo "Execução ainda em andamento... aguardando 5 segundos."
+      sleep 5
+    fi
+  done
+}
+
+# Chama a função principal com os argumentos passados
+main "$@"
