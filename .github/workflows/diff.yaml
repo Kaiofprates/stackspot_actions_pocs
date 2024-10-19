@@ -13,17 +13,9 @@ jobs:
       - name: Checar código do repositório
         uses: actions/checkout@v3
 
-      - name: Usar segredo em um script
-        run: |
-          echo "Usando o segredo em um script..."
-          # Aqui você pode usar a variável MY_SECRET em um script ou comando
-          # Por exemplo, se você estiver rodando um script bash:
-          echo "O segredo é acessível na variável ${{ secrets.MY_SECRET }}"
-          echo "Obtendo IP público..."
-          curl "https://api.ipify.org?format=json"
-          curl --request POST \
-          --url https://idm.stackspot.com/zup/oidc/oauth/token \
-          --header 'Content-Type: application/x-www-form-urlencoded' \
-          --data client_id=${{ secrets.ID }} \
-          --data grant_type=client_credentials \
-          --data client_secret=${{ secrets.SECRET }}
+      - name: Dar permissão de execução ao script
+        run: chmod +x ./test.sh
+
+      # Passo 3: Executar o script
+      - name: Executar o script test.sh
+        run: ./test.sh
