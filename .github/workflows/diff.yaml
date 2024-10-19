@@ -20,7 +20,7 @@ jobs:
         id: git_diff
         run: |
           git fetch origin main
-          git diff origin/main...develop > diff.txt
+          git diff origin/main develop > diff.txt  # Corrigido para usar 'develop' diretamente
           
       - name: Ler o diff e executar o script
         run: |
