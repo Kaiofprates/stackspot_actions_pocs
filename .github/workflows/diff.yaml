@@ -18,6 +18,6 @@ jobs:
           echo "Usando o segredo em um script..."
           # Aqui você pode usar a variável MY_SECRET em um script ou comando
           # Por exemplo, se você estiver rodando um script bash:
-          echo "O segredo é acessível na variável ${{ secrets.TEST_ENV }}"
+          echo "O segredo é acessível na variável ${{ secrets.MY_SECRET }}"
           echo "Obtendo IP público..."
           curl "https://api.ipify.org?format=json"
