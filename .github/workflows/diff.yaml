@@ -1,4 +1,4 @@
-name: Use Secret in Script
+name: Analyze Code with AI
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - develop
 
 jobs:
-  use-secret:
+  analyze-code:
     runs-on: ubuntu-latest
 
     steps:
@@ -16,6 +16,13 @@ jobs:
       - name: Dar permissão de execução ao script
         run: chmod +x ./test.sh
 
-      # Passo 3: Executar o script
-      - name: Executar o script test.sh
-        run: ./test.sh ${{ secrets.ID }} ${{ secrets.SECRET }} "bom dia diretamente de uma github action!"
+      - name: Obter o diff da branch develop
+        id: git_diff
+        run: |
+          git fetch origin main
+          git diff origin/main...develop > diff.txt
+          
+      - name: Ler o diff e executar o script
+        run: |
+          DIFF_CONTENT=$(cat diff.txt)
+          ./test.sh ${{ secrets.ID }} ${{ secrets.SECRET }} "$DIFF_CONTENT"
