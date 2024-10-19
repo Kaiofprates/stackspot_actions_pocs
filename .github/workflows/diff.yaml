@@ -18,4 +18,4 @@ jobs:
 
       # Passo 3: Executar o script
       - name: Executar o script test.sh
-        run: ./test.sh ${{ secrets.ID }} ${{ secrets.SECRET }}
+        run: ./test.sh ${{ secrets.ID }} ${{ secrets.SECRET }} "bom dia diretamente de uma github action!"
