@@ -20,9 +20,15 @@ jobs:
         id: git_diff
         run: |
           git fetch origin main
-          git diff origin/main develop > diff.txt  # Corrigido para usar 'develop' diretamente
+          git diff origin/main develop > diff.txt  # Gera o diff entre 'main' e 'develop'
           
+      - name: Exibir o conteúdo do diff.txt
+        run: |
+          echo "Conteúdo de diff.txt:"
+          cat diff.txt
+
       - name: Ler o diff e executar o script
         run: |
           DIFF_CONTENT=$(cat diff.txt)
+          echo "Conteúdo do DIFF_CONTENT: $DIFF_CONTENT"  # Mostra o conteúdo do DIFF_CONTENT
           ./test.sh ${{ secrets.ID }} ${{ secrets.SECRET }} "$DIFF_CONTENT"
