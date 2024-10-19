@@ -33,7 +33,7 @@ if [ -z "$id" ]; then
 fi
 
 # Aguardando 10 segundos antes de executar o terceiro curl
-sleep 10
+sleep 30
 
 # Executa o terceiro curl usando o ID
 result=$(curl --silent --request GET \
