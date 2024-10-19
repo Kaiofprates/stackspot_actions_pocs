@@ -1,12 +1,16 @@
 #!/bin/bash
 
+# Recebe as variáveis passadas como argumentos
+CLIENT_ID=$1
+CLIENT_SECRET=$2
+
 # Executa o curl e captura a resposta
 response=$(curl --request POST \
   --url https://idm.stackspot.com/zup/oidc/oauth/token \
   --header 'Content-Type: application/x-www-form-urlencoded' \
-  --data client_id=${{ secrets.ID }} \
+  --data client_id=$CLIENT_ID \
   --data grant_type=client_credentials \
-  --data client_secret=${{ secrets.SECRET }})
+  --data client_secret=$CLIENT_SECRET)
 
 # Exibe a resposta completa para depuração
 echo "Resposta do primeiro curl (token): $response"
