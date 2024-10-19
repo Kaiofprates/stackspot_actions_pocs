@@ -1,99 +1,53 @@
 #!/bin/bash
 
-# Função para obter o access_token
-get_access_token() {
-  local client_id=$1
-  local client_secret=$2
-  response=$(curl --silent --request POST \
-    --url https://idm.stackspot.com/zup/oidc/oauth/token \
-    --header 'Content-Type: application/x-www-form-urlencoded' \
-    --data client_id=$client_id \
-    --data grant_type=client_credentials \
-    --data client_secret=$client_secret)
-  
-  access_token=$(echo $response | grep -o '"access_token":"[^"]*"' | sed 's/"access_token":"\([^"]*\)"/\1/')
-  
-  if [ -z "$access_token" ]; then
-    echo "Erro: access_token não encontrado!"
-    exit 1
-  fi
-  
-  echo "$access_token"
-}
+# Recebe as variáveis passadas como argumentos
+CLIENT_ID=$1
+CLIENT_SECRET=$2
+INPUT_DATA=$3  # Novo argumento para o input_data
 
-# Função para criar a execução e obter o ID
-create_execution() {
-  local access_token=$1
-  local input_data=$2
-  response=$(curl --silent --request POST \
-    --url 'https://genai-code-buddy-api.stackspot.com/v1/quick-commands/create-execution/testremote' \
-    --header "Authorization: Bearer $access_token" \
-    --header 'Content-Type: application/json' \
-    --data "{\"input_data\": \"$input_data\"}")
-  
-  execution_id=$(echo $response | grep -o '"execution_id":"[^"]*"' | sed 's/"execution_id":"\([^"]*\)"/\1/')
-  
-  if [ -z "$execution_id" ]; then
-    echo "Erro: execution_id não encontrado!"
-    exit 1
-  fi
-  
-  echo "$execution_id"
-}
+# Executa o curl e captura a resposta
+response=$(curl --request POST \
+  --url https://idm.stackspot.com/zup/oidc/oauth/token \
+  --header 'Content-Type: application/x-www-form-urlencoded' \
+  --data client_id=$CLIENT_ID \
+  --data grant_type=client_credentials \
+  --data client_secret=$CLIENT_SECRET)
 
-# Função para verificar o status da execução
-check_execution_status() {
-  local access_token=$1
-  local execution_id=$2
-  response=$(curl --silent --request GET \
-    --url "https://genai-code-buddy-api.stackspot.com/v1/quick-commands/callback/$execution_id" \
-    --header "Authorization: Bearer $access_token")
-  
-  echo "$response"
-}
+# Exibe a resposta completa para depuração
+echo "Resposta do primeiro curl (token): $response"
 
-# Função principal para orquestrar o fluxo
-main() {
-  local client_id=$1
-  local client_secret=$2
-  local input_data=$3
+# Extrai o access_token da resposta usando grep e sed
+access_token=$(echo $response | grep -o '"access_token":"[^"]*"' | sed 's/"access_token":"\([^"]*\)"/\1/')
 
-  # Obter o access_token
-  access_token=$(get_access_token "$client_id" "$client_secret")
-  echo "Access Token obtido com sucesso."
+# Verifica se o access_token foi extraído corretamente
+if [ -z "$access_token" ]; then
+  echo "Erro: access_token não encontrado!"
+  exit 1
+fi
 
-  # Criar a execução e obter o ID
-  execution_id=$(create_execution "$access_token" "$input_data")
-  echo "Execução criada com ID: $execution_id"
+echo "Access Token: $access_token"
 
-  # Tentar verificar o status até 3 vezes
-  local max_attempts=3
-  local attempt=1
-  local result
+# Executa o segundo curl usando o access_token e o input_data parametrizado
+id=$(curl --request POST \
+  --url 'https://genai-code-buddy-api.stackspot.com/v1/quick-commands/create-execution/testremote' \
+  --header "Authorization: Bearer $access_token" \
+  --header 'Content-Type: application/json' \
+  --data "{\"input_data\": \"$INPUT_DATA\"}")
 
-  while [ $attempt -le $max_attempts ]; do
-    echo "Tentativa $attempt de $max_attempts. Aguardando 10 segundos antes de verificar o status..."
-    sleep 10
+# Extrai o ID da resposta (removendo as aspas)
+id=$(echo $id | sed 's/"//g')
 
-    # Verificar o status da execução
-    result=$(check_execution_status "$access_token" "$execution_id")
+# Adiciona uma latência de 10 segundos antes de executar o terceiro curl
+echo "Aguardando 10 segundos antes de executar o terceiro curl..."
+sleep 10
 
-    # Verifica se o campo 'answer' está presente na resposta
-    echo "$result"
-    
-    if echo "$result" | grep -q '"answer"'; then
-      answer=$(echo "$result" | grep -o '"answer":"[^"]*"' | sed 's/"answer":"\([^"]*\)"/\1/')
-      echo "Execução concluída. Resposta: $answer"
-      exit 0
-    else
-      echo "Execução ainda em andamento ou falhou."
-    fi
+# Executa o terceiro curl usando o ID
+result=$(curl --request GET \
+  --url "https://genai-code-buddy-api.stackspot.com/v1/quick-commands/callback/$id" \
+  --header "Authorization: Bearer $access_token")
 
-    attempt=$((attempt + 1))
-  done
+# Extrai o campo 'answer' da resposta usando grep e sed
+answer=$(echo $result | grep -o '"answer":"[^"]*' | sed 's/"answer":"//')
 
-  echo "Execução não foi concluída após $max_attempts tentativas."
-}
-
-# Chama a função principal com os argumentos passados
-main "$@"
+# Exibe o valor do campo 'answer'
+echo "$answer"
