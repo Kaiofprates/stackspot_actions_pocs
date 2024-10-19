@@ -27,8 +27,11 @@ jobs:
           echo "Conteúdo de diff.txt:"
           cat diff.txt
 
-      - name: Ler o diff e executar o script
+      - name: Adicionar contexto de análise ao diff e executar o script
         run: |
           DIFF_CONTENT=$(cat diff.txt)
-          echo "Conteúdo do DIFF_CONTENT: $DIFF_CONTENT"  # Mostra o conteúdo do DIFF_CONTENT
-          ./test.sh ${{ secrets.ID }} ${{ secrets.SECRET }} "$DIFF_CONTENT"
+          ANALYSIS_CONTEXT="Você é um experiente engenheiro de software sênior. Fará o code review do seguinte código, que é um diff entre duas branches. Observe detalhes de clean code, segurança e boas práticas de programação."
+          FULL_CONTENT="$ANALYSIS_CONTEXT\n\n$DIFF_CONTENT"
+          echo "Conteúdo combinado para análise:"
+          echo "$FULL_CONTENT"  # Exibe o conteúdo combinado (contexto + diff)
+          ./test.sh ${{ secrets.ID }} ${{ secrets.SECRET }} "$FULL_CONTENT"
