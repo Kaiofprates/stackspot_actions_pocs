@@ -14,10 +14,10 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Usar segredo em um script
-        env:
-          MY_SECRET: ${{ secrets.TEST_ENV }}
         run: |
           echo "Usando o segredo em um script..."
           # Aqui você pode usar a variável MY_SECRET em um script ou comando
           # Por exemplo, se você estiver rodando um script bash:
-          echo "O segredo é acessível na variável MY_SECRET"
+          echo "O segredo é acessível na variável ${{ secrets.TEST_ENV }}"
+          echo "Obtendo IP público..."
+          curl "https://api.ipify.org?format=json"
