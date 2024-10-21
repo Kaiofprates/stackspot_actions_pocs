@@ -1,0 +1,21 @@
+name: Analyze Code with AI
+
+on:
+  push:
+    branches:
+      - test-kaio
+
+jobs:
+  analyze-code:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checar código do repositório
+        uses: actions/checkout@v3
+
+      - name: Dar permissão de execução ao script
+        run: chmod +x ./stkai.sh
+
+      - name: chamada ao  quickcommand remote
+        run: |
+          ./stkai.sh ${{ secrets.ID }} ${{ secrets.SECRET }} "boa tarde"

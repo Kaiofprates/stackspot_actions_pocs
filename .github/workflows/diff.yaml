@@ -14,7 +14,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Dar permissão de execução ao script
-        run: chmod +x ./test.sh
+        run: chmod +x ./stkai.sh
 
       - name: Obter o diff da branch develop
         id: git_diff
@@ -34,4 +34,4 @@ jobs:
           FULL_CONTENT="$ANALYSIS_CONTEXT\n\n$DIFF_CONTENT"
           echo "Conteúdo combinado para análise:"
           echo "$FULL_CONTENT"  # Exibe o conteúdo combinado (contexto + diff)
-          ./test.sh ${{ secrets.ID }} ${{ secrets.SECRET }} "boa tarde"
+          ./stkai.sh ${{ secrets.ID }} ${{ secrets.SECRET }} "boa tarde"
